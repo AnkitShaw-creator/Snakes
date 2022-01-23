@@ -2,8 +2,9 @@ import pygame
 from pygame.locals import *
 import random as r
 import time
+from CONSTANTS import * # local file to handle all the constant values
 
-SIZE = 40
+
 # self.parent_surface.fill((r.randrange(0,255), r.randrange(0,255), r.randrange(0,255)))
 BACKGROUND_COLOR = (120, 120, 50)
 
@@ -63,8 +64,8 @@ class Snake:
 
     def increase_length(self):
         self.length += 1
-        self._x.append(40)
-        self._y.append(40)
+        self._x.append(SIZE)
+        self._y.append(SIZE)
 
 
     def draw(self):
@@ -79,7 +80,7 @@ class Game:
     def __init__(self):
         pygame.init() # initializing pygame module for display
         pygame.mixer.init() # initialising pygame module for sound
-        self.surface = pygame.display.set_mode((1000, 800))
+        self.surface = pygame.display.set_mode(SURFACE_SIZE) # setting up the dimentions of game window 
         #self.surface.fill(BACKGROUND_COLOR)
         self.snake = Snake(self.surface, 1)
         self.snake.draw() # drawing snake on the screen
@@ -93,8 +94,8 @@ class Game:
                 return True
 
     def score(self):
-        font = pygame.font.SysFont("arial", 20)
-        score = font.render(f'Score: {self.snake.length}', True, (255, 255, 255))
+        font = pygame.font.SysFont("arial", SCORE_TEXT_SIZE)
+        score = font.render(f'Score: {self.snake.length}', True, SCORE_TEXT_COLOR)
         self.surface.blit(score, (800, 10))
 
     def render_background(self):
@@ -130,13 +131,19 @@ class Game:
             if self.is_collision(self.snake._x[0], self.snake._x[i], self.snake._y[0], self.snake._y[i]):
                 self.play_sound('crash')
                 raise ValueError("Game Over")
+
+        #collision with the walls
+        if (self.snake._x[0] == 0 or self.snake._x[0]==1000)| (self.snake._y[0]==0 or self.snake._y[0] == 800):
+            self.play_sound('crash')
+            raise ValueError("Game Over")
+
             
     def show_game_over(self):
         self.render_background()
-        font = pygame.font.SysFont("arial", 20)
-        GameOver = font.render(f'Game Over. Score: {self.snake.length}', True, (255, 255, 255))
+        font = pygame.font.SysFont("arial", GAME_OVER_TEXT_SIZE)
+        GameOver = font.render(f'Game Over. Score: {self.snake.length}', True, GAME_OVER_TEXT_COLOR)
         self.surface.blit(GameOver, (400, 400))
-        restart = font.render(f'Press Enter to continue', True, (255, 255, 255))
+        restart = font.render(f'Press Enter to continue', True, GAME_OVER_TEXT_COLOR)
         self.surface.blit(restart, (400, 420))
         pygame.display.flip()
         pygame.mixer.music.pause()
@@ -168,6 +175,8 @@ class Game:
                             self.snake.move_left()
                         if event.key == K_RIGHT:
                             self.snake.move_right()
+                        if event.key == K_SPACE:
+                            pause = True
 
                 elif event.type == QUIT:
                     running = False
